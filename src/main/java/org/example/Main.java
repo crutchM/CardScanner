@@ -2,19 +2,29 @@ package org.example;
 
 import jssc.*;
 
+import java.util.ArrayList;
+
 public class Main {
     private static SerialPort serialPort;
 
     public static void main(String[] args) {
         var ports = SerialPortList.getPortNames();
+        ArrayList<String> availablePorts = new ArrayList<String>();
         for (String name : ports) {
-            CheckPort(name);
+            String port = CheckPort(name);
+            if (port != "null"){
+                System.out.println(port);
+                availablePorts.add(port);
+            };
         }
+        System.out.println("done");
+
+
 
     }
 
 
-    public static void CheckPort(String port){
+    public static String CheckPort(String port){
         serialPort = new SerialPort(port);
         try {
             serialPort.openPort();
@@ -26,10 +36,11 @@ public class Main {
             serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN | SerialPort.FLOWCONTROL_RTSCTS_OUT);
             //serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
             serialPort.writeString("WHOAREYOU");
-            System.out.println(serialPort.readString());
+            return serialPort.readString();
         } catch (SerialPortException ex) {
             System.out.println(ex);
         }
+        return "null";
     }
 
 
