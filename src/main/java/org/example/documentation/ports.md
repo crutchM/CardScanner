@@ -2,7 +2,8 @@
 ## Actions before usage
 
 
-we need to configure connection by serial port, and att listeners for atach and remove card
+we need to configure connection by serial port, and add listeners for attach and remove card
+
 ```java
 public static String CheckPort(String port){
         serialPort = new SerialPort(port);
@@ -36,4 +37,34 @@ public static String CheckPort(String port){
         }
         return "null";
     }
+```
+## Connection parameters
+
+### Arduino
+```java
+serialPort.setParams(
+                    SerialPort.BAUDRATE_9600,
+                    SerialPort.DATABITS_8,
+                    SerialPort.STOPBITS_1, SerialPort.PARITY_NONE
+            );
+```
+
+### STM32
+
+
+```java
+ serialPort.setParams(
+                        SerialPort.BAUDRATE_115200,
+                        SerialPort.DATABITS_8,
+                        SerialPort.STOPBITS_1,
+                        SerialPort.PARITY_NONE
+                );
+```
+
+
+# sending commands for relay
+
+
+```java
+        var formated = String.format("Relay code: TRE%014x", Relay.RELAY_5 | Relay.RELAY_8);
 ```

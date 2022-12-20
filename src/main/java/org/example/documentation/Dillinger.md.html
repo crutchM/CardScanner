@@ -1,0 +1,176 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Dillinger.md</title><style></style></head><body id="preview">
+<h1 class="code-line" data-line-start=0 data-line-end=1><a id="CARWASHER_PROTO_v1_0"></a>CARWASHER PROTO v1</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="3">Здесь описан протокол взаимодействия с устройством управления постом автомойки.</p>
+<h3 class="code-line" data-line-start=4 data-line-end=5><a id="__4"></a>Принцип взаимодействия</h3>
+<p class="has-line-data" data-line-start="6" data-line-end="12">Взаимодействие с устройством происходит посредством COM-порта по стандарту RS-232<br>
+Baudrate: 115200<br>
+Databits: 8<br>
+Stopbits: 1<br>
+Parity: None<br>
+Mode: TX-RX</p>
+<h3 class="code-line" data-line-start=14 data-line-end=15><a id="_14"></a>Определения</h3>
+<p class="has-line-data" data-line-start="15" data-line-end="17">Все команды и ответы к ним представлены в виде 17-тисимвольных строк. Команды отправляются к исполнению сразу, как контроллер получает все 17 символов без нажатия кнопки [<code>Enter</code>].<br>
+<code>CMDARGUMENTARGARG</code> - строка в 17 символов длиной, где первые 3 символа - сама команда (<code>CMD</code>). Остальные 14 символов (<code>ARGUMENTARGARG</code>) - аргумент, и если он не требуется, вместо него указываются нули. Аргумент всегда представляется в виде беззнакового 16-тиричного числа. Невостребованные старшие разряды числа заполняются нулями.</p>
+<p class="has-line-data" data-line-start="18" data-line-end="20">После отправки команды всегда следует 17-тисимвольный ответ в таком же формате:<br>
+<code>STS00000000000000</code>, где <code>STS</code> обозначает Status, а <code>00000000000000</code> - дополнительная информация в 16-тиричном формате, где в случае её отсутствия проставляется 14 нулей, а невостребованные старшие разряды 16-тиричного числа, в случае наличия такового, так же будут заполнены недостающим количеством нулей</p>
+<p class="has-line-data" data-line-start="21" data-line-end="23">Контроллер также может отправлять пользователю некоторые сообщения, не являющиеся ответом на команду. Такие сообщения называются событиями. События не предусматривают ответ от пользователя, следовательно, отправлять какое-либо подтверждение получения события не требуется.<br>
+События имеют синтаксис, схожий с синтаксисом команд: это такие же 17-тисимвольные последовательности, где первые 3 символа - название события, а последующие 14 символов - полезная нагрузка.</p>
+<h3 class="code-line" data-line-start=24 data-line-end=25><a id="_24"></a>Ошибки</h3>
+<p class="has-line-data" data-line-start="26" data-line-end="28">В случае отправки несуществующей команды, либо в случаях нарушения синтаксиса, вы получите в ответ “несуществующую команду”. Это значение из 17-ти подряд идущих нолей (<code>00000000000000000</code>)<br>
+Отправить команду длиной меньше чем 17 символов невозможно.</p>
+<h3 class="code-line" data-line-start=29 data-line-end=30><a id="______29"></a>Команды, которые отправляет компьютер в контроллер</h3>
+<h4 class="code-line" data-line-start=31 data-line-end=32><a id="Give_Your_Name_31"></a>Give Your Name</h4>
+<p class="has-line-data" data-line-start="32" data-line-end="35">Пример: <code>GYN00000000000000</code><br>
+Команда: <code>GYN</code><br>
+Аргумент: <code>Не требуется</code></p>
+<p class="has-line-data" data-line-start="36" data-line-end="37">Команда для запроса уникального имени устройства, полученного при прошивке устройства (Для идентификации постов)</p>
+<blockquote>
+<p class="has-line-data" data-line-start="37" data-line-end="39">Ответ<br>
+<code>DUN00001F4487C4BF</code> - Device Unique Number со значением <code>00001F4487C4BF</code></p>
+</blockquote>
+<h4 class="code-line" data-line-start=40 data-line-end=41><a id="Get_Card_ID_40"></a>Get Card ID</h4>
+<p class="has-line-data" data-line-start="41" data-line-end="44">Пример: <code>GCI00000000000000</code><br>
+Команда: <code>GCI</code><br>
+Аргумент: <code>Не требуется</code></p>
+<p class="has-line-data" data-line-start="45" data-line-end="46">Команда для запроса вставленной карты в считыватель устройства.</p>
+<blockquote>
+<p class="has-line-data" data-line-start="46" data-line-end="48">Ответ<br>
+<code>CID5FBA4C890F6ED1</code> - Card UID со значением <code>5FBA4C890F6ED1</code> либо <code>CID00000000000000</code>, если карта не вставлена</p>
+</blockquote>
+<h4 class="code-line" data-line-start=49 data-line-end=50><a id="Get_Relays_Statuses_49"></a>Get Relays Statuses</h4>
+<p class="has-line-data" data-line-start="50" data-line-end="53">Пример: <code>GRS00000000000000</code><br>
+Команда: <code>GRS</code><br>
+Аргумент: <code>Не требуется</code></p>
+<p class="has-line-data" data-line-start="54" data-line-end="56">Команда для запроса состояния включённых сейчас реле.<br>
+В качестве ответа получает 16-тиричное число с маской включённых в настоящий момент реле. Маска читается справа налево.</p>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Response Value</th>
+<th>HEX</th>
+<th>BIN</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>00000000000001</code></td>
+<td><code>0x1</code></td>
+<td><code>0b001</code></td>
+<td>Включено только 1-е реле, остальные выключены</td>
+</tr>
+<tr>
+<td><code>00000000000005</code></td>
+<td><code>0x5</code></td>
+<td><code>0b101</code></td>
+<td>Включены 1-е и 3-е реле, остальные выключены</td>
+</tr>
+<tr>
+<td><code>00000000000011</code></td>
+<td><code>0x11</code></td>
+<td><code>0b1011</code></td>
+<td>Включены 1-е, 2-е и 4-е реле, остальные выключены</td>
+</tr>
+</tbody>
+</table>
+<p class="has-line-data" data-line-start="62" data-line-end="63">И так далее</p>
+<blockquote>
+<p class="has-line-data" data-line-start="64" data-line-end="66">Ответ<br>
+<code>RES00000000000007</code> - Relay Statuses, где <code>00000000000007</code> и является Response Value, расшифровываемое по вышеописанной схеме.</p>
+</blockquote>
+<h4 class="code-line" data-line-start=67 data-line-end=68><a id="Turn_Relay_Enabled_67"></a>Turn Relay Enabled</h4>
+<p class="has-line-data" data-line-start="68" data-line-end="71">Пример: <code>TRE00000000000008</code><br>
+Команда: <code>TRE</code><br>
+Аргумент: <code>Значение двоичного логарифма в 16-тиричном формате</code></p>
+<p class="has-line-data" data-line-start="72" data-line-end="73">Команда для запроса на включение одного реле, его номер определяется по аргументу</p>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Argument Value</th>
+<th>HEX</th>
+<th>BIN</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>00000000000001</code></td>
+<td><code>0x1</code></td>
+<td><code>0b001</code></td>
+<td>Включить 1-е реле</td>
+</tr>
+<tr>
+<td><code>00000000000004</code></td>
+<td><code>0x4</code></td>
+<td><code>0b100</code></td>
+<td>Включить 3-е реле</td>
+</tr>
+<tr>
+<td><code>00000000000016</code></td>
+<td><code>0x10</code></td>
+<td><code>0b10000</code></td>
+<td>Включить 5-е реле</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p class="has-line-data" data-line-start="79" data-line-end="81">Ответ<br>
+<code>REO00000000000008</code> - Relay Enabled OK, где <code>00000000000008</code> - значение переданного аргумента при отправке команды.</p>
+</blockquote>
+<h4 class="code-line" data-line-start=82 data-line-end=83><a id="Turn_Relay_Disabled_82"></a>Turn Relay Disabled</h4>
+<p class="has-line-data" data-line-start="83" data-line-end="86">Пример: <code>TRD00000000000008</code><br>
+Команда: <code>TRD</code><br>
+Аргумент: <code>Значение двоичного логарифма в 16-тиричном формате</code></p>
+<p class="has-line-data" data-line-start="87" data-line-end="88">Команда для запроса на выключение одного реле, его номер определяется по аргументу, описанному в команде выше (TRE).</p>
+<blockquote>
+<p class="has-line-data" data-line-start="89" data-line-end="91">Ответ<br>
+<code>RDO00000000000008</code> - Relay Disabled OK, где <code>00000000000008</code> - значение переданного аргумента при отправке команды.</p>
+</blockquote>
+<h4 class="code-line" data-line-start=92 data-line-end=93><a id="Switch_Relay_Status_92"></a>Switch Relay Status</h4>
+<p class="has-line-data" data-line-start="93" data-line-end="96">Пример: <code>SRS00000000000008</code><br>
+Команда: <code>SRS</code><br>
+Аргумент: <code>Значение двоичного логарифма в 16-тиричном формате</code></p>
+<p class="has-line-data" data-line-start="97" data-line-end="99">Команда для запроса на переключение состояния одного реле, его номер определяется по аргументу, описанному в команде выше (TRE).<br>
+Переключение происходит согласно принципу <code>a = !a</code>, где “а” - состояние реле.</p>
+<blockquote>
+<p class="has-line-data" data-line-start="100" data-line-end="102">Ответ<br>
+<code>RSO00000000000008</code> - Relay Switched OK, где <code>00000000000008</code> - значение переданного аргумента при отправке команды.</p>
+</blockquote>
+<h4 class="code-line" data-line-start=103 data-line-end=104><a id="Change_Balance_Value_103"></a>Change Balance Value</h4>
+<p class="has-line-data" data-line-start="104" data-line-end="107">Пример: <code>CBV000000000000FF</code><br>
+Команда: <code>CBV</code><br>
+Аргумент: <code>Значение в 16-тиричном формате. Значимость определена для не более 2-х байт</code></p>
+<p class="has-line-data" data-line-start="108" data-line-end="109">Команда, служащая для изменения значения баланса, отображаемого на пользовательском экране устройства.</p>
+<blockquote>
+<p class="has-line-data" data-line-start="110" data-line-end="112">Ответ<br>
+<code>VBO000000000000FF</code> - Value Balance OK, где <code>000000000000FF</code> - значение переданного аргумента при отправке команды.</p>
+</blockquote>
+<h4 class="code-line" data-line-start=113 data-line-end=114><a id="Change_Time_Value_113"></a>Change Time Value</h4>
+<p class="has-line-data" data-line-start="114" data-line-end="117">Пример: <code>CTV00000000000100</code><br>
+Команда: <code>CTV</code><br>
+Аргумент: <code>Значение в 16-тиричном формате. Значимость определена для не более 2-х байт</code></p>
+<p class="has-line-data" data-line-start="118" data-line-end="120">Команда, служащая для изменения значения остатка времени, отображаемого на пользовательском экране устройства. Передаётся количество секунд, в течение которых пользователю будет доступно устройство.<br>
+Например, при отправке команды <code>CTV00000000000100</code>, переменная TIME будет установлена в значение 256 (т.к. 0x100 = 256). Это значит, что на экран будет выведено <code>4:16</code>, что символизирует 4 минуты 16 секунд</p>
+<blockquote>
+<p class="has-line-data" data-line-start="121" data-line-end="123">Ответ<br>
+<code>VTO00000000000100</code> - Value Time OK, где <code>00000000000100</code> - значение переданного аргумента при отправке команды.</p>
+</blockquote>
+<h3 class="code-line" data-line-start=126 data-line-end=127><a id="______126"></a>События, которые отправляет контроллер в компьютер</h3>
+<h4 class="code-line" data-line-start=128 data-line-end=129><a id="A_Button_Pressed_128"></a>A Button Pressed</h4>
+<p class="has-line-data" data-line-start="129" data-line-end="132">Пример: <code>ABP00000000000008</code><br>
+Событие: <code>CTV</code><br>
+Полезная нагрузка: <code>Значение двоичного логарифма в 16-тиричном формате. Значимость определена только для 1-го байта</code></p>
+<p class="has-line-data" data-line-start="133" data-line-end="135">Событие, сигнализирующее о нажатии кнопки на устройстве. В качестве полезной нагрузки приходит двоичный логарифм.<br>
+Например, <code>ABP00000000000008</code> означает, что нажата кнопка номер 4 (т.к. 0x08 = 0b1000).</p>
+<h4 class="code-line" data-line-start=136 data-line-end=137><a id="New_Card_Present_136"></a>New Card Present</h4>
+<p class="has-line-data" data-line-start="137" data-line-end="140">Пример: <code>NCPFBC2BD1A552319</code><br>
+Событие: <code>NCP</code><br>
+Полезная нагрузка: <code>Значение в 16-тиричном формате</code></p>
+<p class="has-line-data" data-line-start="141" data-line-end="143">Событие, сигнализирующее о появлении новой карты на считывателе устройства. В качестве полезной нагрузки приходит 7-мибайтовый UID Mifare-карты.<br>
+Например, <code>NCPFBC2BD1A552319</code> означает, что представлена карта с UID <code>FB:C2:BD:1A:55:23:19</code>.</p>
+<h4 class="code-line" data-line-start=144 data-line-end=145><a id="Warning_Card_Left_144"></a>Warning! Card Left</h4>
+<p class="has-line-data" data-line-start="145" data-line-end="148">Пример: <code>WCL00000000000000</code><br>
+Событие: <code>WCL</code><br>
+Полезная нагрузка: <code>Не определена</code></p>
+<p class="has-line-data" data-line-start="149" data-line-end="150">Событие, сигнализирующее о снятии Mifare-карты со считывателя.</p>
+</body></html>

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.CardScanner;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -8,7 +8,7 @@ import jssc.SerialPortException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class PortReader implements SerialPortEventListener {
+public class PortReader implements SerialPortEventListener {
 
 
     private String actualCard = "";
