@@ -2,10 +2,8 @@ package org.example.models;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public class Cards {
@@ -28,8 +26,16 @@ public class Cards {
         }
     }
 
-    public void commitChanges(){
-
+    public void commitChanges() throws IOException {
+        Gson gson = new Gson();
+        var res = gson.toJson(this);
+        res = res.replace("{\"cards\":", "");
+        res = res.replace("]}", "]");
+        File file = new File("/home/crutchm/IdeaProjects/CardScanner/src/main/java/org/example/models/dataSource/cards.json");
+        FileOutputStream fo = new FileOutputStream(file, false);
+        byte[] bytes = res.getBytes();
+        fo.write(bytes);
+        fo.close();
     }
 
 

@@ -6,6 +6,7 @@ import org.example.models.Card;
 import org.example.models.Cards;
 import org.example.sys.OutputCommands;
 
+import java.io.IOException;
 import java.util.TimerTask;
 
 public class CustomTimerTask extends TimerTask {
@@ -38,6 +39,8 @@ public class CustomTimerTask extends TimerTask {
             this.timeLeft -= 1;
             this.cards.commitChanges();
         } catch (SerialPortException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

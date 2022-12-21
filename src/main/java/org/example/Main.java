@@ -1,34 +1,45 @@
 package org.example;
 
+import com.sun.source.util.TaskEvent;
 import jssc.*;
 import org.example.CarWasherController.SerialPortReader;
 import org.example.CardScanner.CardStatusListener;
 import org.example.CardScanner.PortReader;
+import org.example.models.Card;
 import org.example.models.Cards;
 import org.example.sys.RedisCon;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Main {
     private static SerialPort serialPort;
 
-    public static void main(String[] args) throws SerialPortException, InterruptedException {
+    public static void main(String[] args) throws SerialPortException, InterruptedException, IOException {
         var ports = SerialPortList.getPortNames();
-        var port = ports[1];
-        //CheckPort(port);
-        initPort(port);
-//        var sender = new SerialPortSender(serialPort);
-//        sender.sendCommand(OutputCommands.GYN, "");
-//        Thread.sleep(1000);
-//        sender.sendCommand(OutputCommands.TRE, "00000000000008");
-//        Thread.sleep(1000);
-//        sender.sendCommand(OutputCommands.TRD, "00000000000008");
-//        Thread.sleep(1000);
-//        sender.sendCommand(OutputCommands.GRS, "");
+        var port = ports[0];
+        CheckPort(port);
 
+        var jedis = RedisCon.pool.getResource();
+        jedis.subscribe(new JedisPubSub() {
+            @Override
+            public void onMessage(String channel, String message) {
+                try {
+                    RedisCon.PerformResponse(message);
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println(message);
+            }
+        }, "toServer");
+        //initPort(port);
         while (true){
 
         }
@@ -80,14 +91,7 @@ public class Main {
         return "null";
     }
     private static void initPort(String port){
-//        var jedis = RedisCon.pool.getResource();
-//        jedis.subscribe(new JedisPubSub() {
-//            @Override
-//            public void onMessage(String channel, String message) {
-//                super.onMessage(channel, message);
-//                System.out.println(message);
-//            }
-//        }, "toServer");
+
         serialPort = new SerialPort(port);
             try {
                 serialPort.openPort();
