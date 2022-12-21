@@ -1,22 +1,20 @@
 package org.example;
 
 import jssc.*;
-import org.example.CarWasherController.OutputCommands;
-import org.example.CarWasherController.Relay;
 import org.example.CarWasherController.SerialPortReader;
-import org.example.CarWasherController.SerialPortSender;
 import org.example.CardScanner.CardStatusListener;
 import org.example.CardScanner.PortReader;
+import org.example.models.Cards;
+import org.example.models.Relay;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.io.FileNotFoundException;
 
 public class Main {
     private static SerialPort serialPort;
 
     public static void main(String[] args) throws SerialPortException, InterruptedException {
         var ports = SerialPortList.getPortNames();
-        var port = ports[1];
+        var port = ports[0];
         //CheckPort(port);
         initPort(port);
 //        var sender = new SerialPortSender(serialPort);
@@ -46,10 +44,17 @@ public class Main {
             var reader = new PortReader(serialPort);
             reader.addCardStateListener(new CardStatusListener() {
                 @Override
-                public void cardIsAttached(String id) {
+                public void cardIsAttached(String id) throws FileNotFoundException {
                     var temp = id.replace("\r\n", " ");
                     temp = temp.replace("CARD UID", "");
                     System.out.println("Приложили: " + temp);
+                    Cards cards = new Cards();
+                    System.out.println(cards.toString());
+                    System.out.println(cards.getCard(temp.replace(" ", "")));
+                    cards.setBalance(temp.replace(" ", ""), 10);
+                    System.out.println(cards.getCard(temp.replace(" ", "")));
+                    System.out.println(cards.toString());
+
                 }
 
                 @Override

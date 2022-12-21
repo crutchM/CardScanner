@@ -5,6 +5,7 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
+import java.io.FileNotFoundException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -76,6 +77,8 @@ public class PortReader implements SerialPortEventListener {
             }
         } catch (SerialPortException ex) {
             System.out.println(ex);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -6,6 +6,7 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.example.CardScanner.CardStatusListener;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -55,16 +56,16 @@ public class SerialPortReader implements SerialPortEventListener {
         },0, 500);
     }
 
-    private void performCallbacks() throws SerialPortException {
+    private void performCallbacks() throws SerialPortException, InterruptedException, FileNotFoundException {
         var command = this.callback.getContent();
         if (command.contains("ABP")) {
-            System.out.println(this.handler.SwitchRelayStatus(command.replace("ABP", "")));
+            this.handler.SwitchRelayStatus(command.replace("ABP", ""), command.replace("APB", ""));
         }
         if (command.contains("NCP")){
-
+            this.handler.cardsIsAttached = true;
         }
         if (command.contains("WCL")){
-
+            this.handler.cardsIsAttached = false;
         }
     }
 
@@ -88,8 +89,10 @@ public class SerialPortReader implements SerialPortEventListener {
                 this.performCallbacks();
 
             }
-        } catch (SerialPortException e){
+        } catch (SerialPortException | InterruptedException e){
             System.out.println(e);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -1,9 +1,8 @@
 package org.example.CarWasherController;
 
 import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
+import org.example.models.OutputCommands;
 
 public class SerialPortSender {
 

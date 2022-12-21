@@ -1,4 +1,4 @@
-package org.example.CarWasherController;
+package org.example.models;
 
 public class Relay {
     public static final int RELAY_1 = 0x1;

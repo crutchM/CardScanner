@@ -1,4 +1,4 @@
-package org.example.CarWasherController;
+package org.example.models;
 
 public enum OutputCommands {
     GYN, //give your nam
@@ -6,6 +6,7 @@ public enum OutputCommands {
     GRS, //get relay statuses
     TRE, //turn relay enabled
     TRD, //turn relay disabled
+    @Deprecated
     SRS, //switch relay statuses
     CBV, //change balance value
     CTV, //change time value
