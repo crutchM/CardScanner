@@ -1,4 +1,4 @@
-package org.example.models;
+package org.example.sys;
 
 public class Tariffs {
     public static int RELAY_1 = 20;

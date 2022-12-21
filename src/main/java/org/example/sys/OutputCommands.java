@@ -1,4 +1,4 @@
-package org.example.models;
+package org.example.sys;
 
 public enum OutputCommands {
     GYN, //give your nam

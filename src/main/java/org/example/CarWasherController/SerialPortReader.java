@@ -5,6 +5,8 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.example.CardScanner.CardStatusListener;
+import org.example.models.Cards;
+import org.example.sys.OutputCommands;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -29,6 +31,8 @@ public class SerialPortReader implements SerialPortEventListener {
 
     private SerialPort serialPort;
 
+    private SerialPortSender serialPortSender;
+
     public void addCardStateListener(CardStatusListener listener) {
         this.listener = listener;
     }
@@ -36,7 +40,8 @@ public class SerialPortReader implements SerialPortEventListener {
 
     public SerialPortReader(SerialPort serialPort){
         this.serialPort = serialPort;
-        this.handler = new ButtonsHandler(serialPort);
+        this.serialPortSender = new SerialPortSender(serialPort);
+        this.handler = new ButtonsHandler(serialPortSender, serialPort);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -58,15 +63,30 @@ public class SerialPortReader implements SerialPortEventListener {
 
     private void performCallbacks() throws SerialPortException, InterruptedException, FileNotFoundException {
         var command = this.callback.getContent();
+        if(command == null) {
+            System.out.println("Ууу, ничего не пришло");
+            return;
+        }
+        Thread.sleep(1000);
         if (command.contains("ABP")) {
-            this.handler.SwitchRelayStatus(command.replace("ABP", ""), command.replace("APB", ""));
+            this.handler.SwitchRelayStatus(command.replace("ABP", ""));
+
         }
         if (command.contains("NCP")){
             this.handler.cardsIsAttached = true;
+            this.handler.setCardId(command.replace("NCP", ""));
+            var card = new Cards().getCard(command.replace("NCP000000", "").toUpperCase());
+            this.serialPortSender.sendCommand(OutputCommands.CTV, "00000000000000");
+            this.serialPortSender.sendCommand(OutputCommands.CBV, String.format("%014x", card.getBalance()));
         }
         if (command.contains("WCL")){
             this.handler.cardsIsAttached = false;
+            this.handler.setCardId("");
+            this.serialPortSender.sendCommand(OutputCommands.TRD, "000000000000FF");
+            this.serialPortSender.sendCommand(OutputCommands.CBV, "00000000000000");
+            this.handler.dropTimer();
         }
+
     }
 
 
@@ -87,6 +107,7 @@ public class SerialPortReader implements SerialPortEventListener {
                 this.callback = new SerialPortCallback(response);
                 System.out.println("системное сообщение: " + response);
                 this.performCallbacks();
+                Thread.sleep(100);
 
             }
         } catch (SerialPortException | InterruptedException e){

@@ -5,16 +5,19 @@ import org.example.CarWasherController.SerialPortReader;
 import org.example.CardScanner.CardStatusListener;
 import org.example.CardScanner.PortReader;
 import org.example.models.Cards;
-import org.example.models.Relay;
+import org.example.sys.RedisCon;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
 
 import java.io.FileNotFoundException;
+import java.util.Queue;
 
 public class Main {
     private static SerialPort serialPort;
 
     public static void main(String[] args) throws SerialPortException, InterruptedException {
         var ports = SerialPortList.getPortNames();
-        var port = ports[0];
+        var port = ports[1];
         //CheckPort(port);
         initPort(port);
 //        var sender = new SerialPortSender(serialPort);
@@ -46,14 +49,17 @@ public class Main {
                 @Override
                 public void cardIsAttached(String id) throws FileNotFoundException {
                     var temp = id.replace("\r\n", " ");
+                    String redisMsg = "";
                     temp = temp.replace("CARD UID", "");
                     System.out.println("Приложили: " + temp);
-                    Cards cards = new Cards();
-                    System.out.println(cards.toString());
-                    System.out.println(cards.getCard(temp.replace(" ", "")));
-                    cards.setBalance(temp.replace(" ", ""), 10);
-                    System.out.println(cards.getCard(temp.replace(" ", "")));
-                    System.out.println(cards.toString());
+                    if (temp.contains("READY")){
+                        redisMsg = "status=READY";
+                    } else redisMsg = "cardIn=" + temp;
+                    try (Jedis jedis = RedisCon.pool.getResource()){
+
+                        jedis.publish("toClient", redisMsg);
+
+                    }
 
                 }
 
@@ -62,6 +68,9 @@ public class Main {
                     var temp = id.replace("\r\n", " ");
                     temp = temp.replace("CARD UID", "");
                     System.out.println("Убрали: " + temp);
+                    try (Jedis jedis = RedisCon.pool.getResource()){
+                        jedis.publish("toClient", "cardOut=" + temp);
+                    }
                 }
             });
             serialPort.addEventListener(reader, SerialPort.MASK_RXCHAR);
@@ -71,6 +80,14 @@ public class Main {
         return "null";
     }
     private static void initPort(String port){
+//        var jedis = RedisCon.pool.getResource();
+//        jedis.subscribe(new JedisPubSub() {
+//            @Override
+//            public void onMessage(String channel, String message) {
+//                super.onMessage(channel, message);
+//                System.out.println(message);
+//            }
+//        }, "toServer");
         serialPort = new SerialPort(port);
             try {
                 serialPort.openPort();

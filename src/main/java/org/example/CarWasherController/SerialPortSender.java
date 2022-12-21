@@ -2,7 +2,7 @@ package org.example.CarWasherController;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
-import org.example.models.OutputCommands;
+import org.example.sys.OutputCommands;
 
 public class SerialPortSender {
 

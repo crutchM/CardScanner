@@ -1,4 +1,4 @@
-package org.example.models;
+package org.example.sys;
 
 public class Relay {
     public static final int RELAY_1 = 0x1;
