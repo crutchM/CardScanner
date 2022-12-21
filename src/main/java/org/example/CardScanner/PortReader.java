@@ -62,8 +62,8 @@ public class PortReader implements SerialPortEventListener {
                 String data = serialPort.readString(event.getEventValue());
                 builder.append(data);
                 if (data.contains("\r\n")) {
-                    var tmp = builder.toString();
-                    var result = tmp.replace('\t', ' ');
+                    String tmp = builder.toString();
+                    String result = tmp.replace('\t', ' ');
                     this.actualCard = result;
                     if (!this.lastChanges.equals(result.split("\r\n")[0])) {
                         this.lastChanges = result.split("\r\n")[0];

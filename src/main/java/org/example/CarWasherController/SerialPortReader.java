@@ -5,6 +5,7 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.example.CardScanner.CardStatusListener;
+import org.example.models.Card;
 import org.example.models.Cards;
 import org.example.sys.OutputCommands;
 
@@ -62,7 +63,7 @@ public class SerialPortReader implements SerialPortEventListener {
     }
 
     private void performCallbacks() throws SerialPortException, InterruptedException, FileNotFoundException {
-        var command = this.callback.getContent();
+        String command = this.callback.getContent();
         if(command == null) {
             System.out.println("Ууу, ничего не пришло");
             return;
@@ -75,7 +76,7 @@ public class SerialPortReader implements SerialPortEventListener {
         if (command.contains("NCP")){
             this.handler.cardsIsAttached = true;
             this.handler.setCardId(command.replace("NCP", ""));
-            var card = new Cards().getCard(command.replace("NCP000000", "").toUpperCase());
+            Card card = new Cards().getCard(command.replace("NCP000000", "").toUpperCase());
             this.serialPortSender.sendCommand(OutputCommands.CTV, "00000000000000");
             this.serialPortSender.sendCommand(OutputCommands.CBV, String.format("%014x", card.getBalance()));
         }

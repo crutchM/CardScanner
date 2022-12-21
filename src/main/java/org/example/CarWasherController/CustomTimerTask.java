@@ -33,7 +33,7 @@ public class CustomTimerTask extends TimerTask {
     public void run()  {
         try{
             this.setData();
-            var dif = this.card.getBalance() - this.tariff;
+            int dif = this.card.getBalance() - this.tariff;
             this.cards.setBalance(this.card.getCardId(), dif);
             this.card.setBalance(dif);
             this.timeLeft -= 1;

@@ -18,14 +18,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Main {
-    private static SerialPort serialPort;
 
     public static void main(String[] args) throws SerialPortException, InterruptedException, IOException {
-        var ports = SerialPortList.getPortNames();
-        var port = ports[0];
+        String[] ports = SerialPortList.getPortNames();
+        String port = ports[0];
         CheckPort(port);
-
-        var jedis = RedisCon.pool.getResource();
+        initPort(ports[1]);
+        Jedis jedis = RedisCon.pool.getResource();
         jedis.subscribe(new JedisPubSub() {
             @Override
             public void onMessage(String channel, String message) {
@@ -46,7 +45,7 @@ public class Main {
     }
 
     public static String CheckPort(String port){
-        serialPort = new SerialPort(port);
+        SerialPort serialPort = new SerialPort(port);
         try {
             serialPort.openPort();
             serialPort.setParams(
@@ -55,11 +54,11 @@ public class Main {
                     SerialPort.STOPBITS_1, SerialPort.PARITY_NONE
             );
             serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN | SerialPort.FLOWCONTROL_RTSCTS_OUT);
-            var reader = new PortReader(serialPort);
+            PortReader reader = new PortReader(serialPort);
             reader.addCardStateListener(new CardStatusListener() {
                 @Override
                 public void cardIsAttached(String id) throws FileNotFoundException {
-                    var temp = id.replace("\r\n", " ");
+                    String temp = id.replace("\r\n", " ");
                     String redisMsg = "";
                     temp = temp.replace("CARD UID", "");
                     System.out.println("Приложили: " + temp);
@@ -76,7 +75,7 @@ public class Main {
 
                 @Override
                 public void cardIsRemoved(String id) {
-                    var temp = id.replace("\r\n", " ");
+                    String temp = id.replace("\r\n", " ");
                     temp = temp.replace("CARD UID", "");
                     System.out.println("Убрали: " + temp);
                     try (Jedis jedis = RedisCon.pool.getResource()){
@@ -92,7 +91,7 @@ public class Main {
     }
     private static void initPort(String port){
 
-        serialPort = new SerialPort(port);
+        SerialPort serialPort = new SerialPort(port);
             try {
                 serialPort.openPort();
                 serialPort.setParams(
@@ -102,7 +101,7 @@ public class Main {
                         SerialPort.PARITY_NONE
                 );
                 serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN | SerialPort.FLOWCONTROL_XONXOFF_OUT);
-                var reader = new SerialPortReader(serialPort);
+                SerialPortReader reader = new SerialPortReader(serialPort);
                 reader.addCardStateListener(new CardStatusListener() {
                     @Override
                     public void cardIsAttached(String id) {

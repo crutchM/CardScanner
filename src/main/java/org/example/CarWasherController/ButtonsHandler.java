@@ -44,8 +44,8 @@ public class ButtonsHandler {
         if (card.getBalance() == 0){
             return;
         }
-        var tariff = Tariffs.getTarriff(relay);
-        var statuses = this.serialPort.readString();
+        int tariff = Tariffs.getTarriff(relay);
+        String statuses = this.serialPort.readString();
         Thread.sleep(100);
         if (statuses == null || statuses.equals("RES00000000000000")  ){
             this.serialPortSender.sendCommand(OutputCommands.TRE, relay);
@@ -79,7 +79,7 @@ public class ButtonsHandler {
 
     private String deleteZero(String line){
         int i = line.length() - 1;
-        var tmp = line.toCharArray();
+        char[] tmp = line.toCharArray();
         StringBuilder sb = new StringBuilder();
         while (sb.length() <= 14 && i >= 0){
             sb.append(tmp[i]);

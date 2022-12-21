@@ -13,7 +13,7 @@ public class Cards {
 
     public Cards() throws FileNotFoundException {
         Gson gson = new Gson();
-        var json = this.readFile();
+        String json = this.readFile();
         this.cards =  gson.fromJson(json, Card[].class);
 
     }
@@ -28,7 +28,7 @@ public class Cards {
 
     public void commitChanges() throws IOException {
         Gson gson = new Gson();
-        var res = gson.toJson(this);
+        String res = gson.toJson(this);
         res = res.replace("{\"cards\":", "");
         res = res.replace("]}", "]");
         File file = new File("/home/crutchm/IdeaProjects/CardScanner/src/main/java/org/example/models/dataSource/cards.json");
